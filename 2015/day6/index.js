@@ -1,21 +1,10 @@
 const input = require("fs").readFileSync("input.txt", "utf-8").split("\n");
 input.pop();
 
-// const map = (function () {
-//     let obj = {};
+let part1_map = {},
+    part2_map = {};
 
-//     for (let x = 0; x < 1000; x++) {
-//         for (let y = 0; y < 1000; y++) {
-//             obj[`${x};${y}`] = 0;
-//         }
-//     }
-
-//     return obj;
-// })();
-
-const map = {};
-
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < input.length; i++) {
     let matched = input[i]
         .match(/([a-z]+|[a-z]+ [a-z]+) (\d+),(\d+) [a-z]+ (\d+),(\d+)/)
         .map((x) => (!isNaN(parseInt(x)) ? parseInt(x) : x));
@@ -23,10 +12,43 @@ for (let i = 0; i < 3; i++) {
 
     const [action, x1, y1, x2, y2] = matched;
 
-    console.log(matched);
+    for (let x = x1; x <= x2; x++) {
+        for (let y = y1; y <= y2; y++) {
+            const pos = `${x};${y}`;
+            switch (action) {
+                case "turn on":
+                    part1_map[pos] = 1;
+
+                    if (!part2_map.hasOwnProperty(pos)) part2_map[pos] = 0;
+                    part2_map[pos]++;
+
+                    break;
+
+                case "turn off":
+                    part1_map[pos] = 0;
+
+                    if (!part2_map.hasOwnProperty(pos)) part2_map[pos] = 0;
+                    if (part2_map[pos] >= 1) part2_map[pos]--;
+
+                    break;
+
+                case "toggle":
+                    if (!part1_map.hasOwnProperty(pos)) part1_map[pos] = 0;
+                    part1_map[pos] = +!part1_map[pos];
+
+                    if (!part2_map.hasOwnProperty(pos)) part2_map[pos] = 0;
+                    part2_map[pos] += 2;
+
+                    break;
+            }
+        }
+    }
 }
 
 let part1 = 0,
     part2 = 0;
+
+part1 = Object.values(part1_map).reduce((acc, cur) => acc + cur, 0);
+part2 = Object.values(part2_map).reduce((acc, cur) => acc + cur, 0);
 
 console.log(part1, part2);
