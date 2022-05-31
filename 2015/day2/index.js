@@ -1,6 +1,4 @@
-let input = require("fs").readFileSync("input.txt", "utf-8").replace(/\n+$/, "").split("\n");
-// input.pop(); // Trim trailing newline
-console.log(input);
+let input = require("fs").readFileSync("input.txt", "utf-8").trim().split("\n");
 
 let part1 = 0,
     part2 = 0;

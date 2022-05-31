@@ -1,5 +1,4 @@
-const input = require("fs").readFileSync("input.txt", "utf-8").split("\n");
-input.pop();
+const input = require("fs").readFileSync("input.txt", "utf-8").trim().split("\n");
 
 let part1_map = {},
     part2_map = {};
