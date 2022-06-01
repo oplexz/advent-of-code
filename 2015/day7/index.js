@@ -5,60 +5,77 @@ let part1 = 0,
 
 let wires = {};
 
+// Helpers
+
+function isNumber(value) {
+    return typeof value === "number" && isFinite(value);
+}
+
+function isWireDefined(value) {
+    return wires.hasOwnProperty(value);
+}
+
+function getArgs(str, regex) {
+    let matched = str.match(regex),
+        out = [];
+
+    for (let i = 1; i < matched.length; i++) {
+        let str = matched[i];
+        let n = parseInt(str);
+
+        if (isNaN(n)) out.push(str);
+        else out.push(n);
+    }
+
+    return out;
+}
+
+function resolveValues(arg1, arg2) {
+    if (typeof arg2 === "undefined") {
+        if (isNumber(arg1)) return [arg1];
+        else if (isWireDefined(arg1)) return [wires[arg1]];
+        else return false;
+    } else {
+        if (isNumber(arg1) && isWireDefined(arg2)) return [arg1, wires[arg2]];
+        else if (isWireDefined(arg1) && isNumber(arg2)) return [wires[arg1], arg2];
+        else if (isWireDefined(arg1) && isWireDefined(arg2)) return [wires[arg1], wires[arg2]];
+        else return false;
+    }
+}
+
+// Main
+
 function doOperation(str) {
     let [ins, out] = str.split(" -> ");
 
-    if (wires.hasOwnProperty(out)) return; // avoid finding wires more than once
+    if (isWireDefined(out)) return; // avoid finding wires more than once
 
     const regex1 = /([a-z0-9]+) ([A-Z]+) ([a-z0-9]+)/; // a X b -> c
     const regex2 = /([A-Z]+) ([a-z0-9]+)/; // X a -> b
     const regex3 = /([a-z0-9]+)/; // a -> b
 
-    function getArgs(str, regex) {
-        let matched = str.match(regex),
-            out = [];
-
-        for (let i = 1; i < matched.length; i++) {
-            let str = matched[i];
-            let n = parseInt(str);
-
-            if (isNaN(n)) out.push(str);
-            else out.push(n);
-        }
-
-        return out;
-    }
-
     if (regex1.test(ins)) {
         let [arg1, op, arg2] = getArgs(ins, regex1);
 
+        values = resolveValues(arg1, arg2);
+
+        if (!values) return;
+
         switch (op) {
             case "OR":
-                if (typeof arg1 == "number" && wires.hasOwnProperty(arg2)) wires[out] = arg1 | wires[arg2];
-                else if (wires.hasOwnProperty(arg1) && typeof arg2 == "number") wires[out] = wires[arg1] | arg2;
-                else if (wires.hasOwnProperty(arg1) && wires.hasOwnProperty(arg2))
-                    wires[out] = wires[arg1] | wires[arg2];
+                wires[out] = values[0] | values[1];
                 break;
 
             case "AND":
-                if (typeof arg1 == "number" && wires.hasOwnProperty(arg2)) wires[out] = arg1 & wires[arg2];
-                else if (wires.hasOwnProperty(arg1) && typeof arg2 == "number") wires[out] = wires[arg1] & arg2;
-                else if (wires.hasOwnProperty(arg1) && wires.hasOwnProperty(arg2))
-                    wires[out] = wires[arg1] & wires[arg2];
+                wires[out] = values[0] & values[1];
                 break;
 
             case "LSHIFT":
-                if (typeof arg1 == "number" && wires.hasOwnProperty(arg2)) wires[out] = arg1 << wires[arg2];
-                else if (wires.hasOwnProperty(arg1) && typeof arg2 == "number") wires[out] = wires[arg1] << arg2;
-                else if (wires.hasOwnProperty(arg1) && wires.hasOwnProperty(arg2))
-                    wires[out] = wires[arg1] << wires[arg2];
+                wires[out] = values[0] << values[1];
                 break;
 
             case "RSHIFT":
-                if (typeof arg1 == "number" && wires.hasOwnProperty(arg2)) wires[out] = arg1 >> wires[arg2];
-                else if (wires.hasOwnProperty(arg1) && typeof arg2 == "number") wires[out] = wires[arg1] >> arg2;
-                else if (wires.hasOwnProperty(arg1) && wires.hasOwnProperty(arg2))
-                    wires[out] = wires[arg1] >> wires[arg2];
+                wires[out] = values[0] >> values[1];
                 break;
 
             default:
@@ -67,10 +84,13 @@ function doOperation(str) {
         }
     } else if (regex2.test(ins)) {
         let [op, arg1] = getArgs(ins, regex2);
+        let values = resolveValues(arg1);
+
+        if (!values) return;
 
         switch (op) {
             case "NOT":
-                if (wires.hasOwnProperty(arg1)) wires[out] = ~wires[arg1];
+                wires[out] = ~values[0];
                 break;
 
             default:
@@ -79,19 +99,36 @@ function doOperation(str) {
         }
     } else if (regex3.test(ins)) {
         let [arg1] = getArgs(ins, regex3);
+        let values = resolveValues(arg1);
 
-        if (typeof arg1 == "number") wires[out] = arg1;
-        else if (wires.hasOwnProperty(arg1)) wires[out] = wires[arg1];
+        if (!values) return;
+
+        wires[out] = values[0];
     } else {
         console.error("Input was not matched!", str);
         process.exit();
     }
 }
 
-while (!wires.hasOwnProperty("a")) {
-    input.forEach((x) => doOperation(x));
+function findPart1() {
+    while (!isWireDefined("a")) {
+        input.forEach((x) => doOperation(x));
+    }
+
+    part1 = wires["a"];
 }
 
-part1 = wires["a"];
+function findPart2() {
+    wires = { b: part1 };
+
+    while (!isWireDefined("a")) {
+        input.forEach((x) => doOperation(x));
+    }
+
+    part2 = wires["a"];
+}
+
+findPart1();
+findPart2();
 
 console.log(part1, part2);
