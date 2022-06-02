@@ -1,7 +1,4 @@
-const input = require("fs").readFileSync("input.txt", "utf-8").trim().split("\n");
-
-let part1 = 0,
-    part2 = 0;
+"use strict";
 
 let wires = {};
 
@@ -57,7 +54,7 @@ function doOperation(str) {
     if (regex1.test(ins)) {
         let [arg1, op, arg2] = getArgs(ins, regex1);
 
-        values = resolveValues(arg1, arg2);
+        let values = resolveValues(arg1, arg2);
 
         if (!values) return;
 
@@ -110,25 +107,36 @@ function doOperation(str) {
     }
 }
 
-function findPart1() {
-    while (!isWireDefined("a")) {
-        input.forEach((x) => doOperation(x));
-    }
+// Part 1
+// ======
 
-    part1 = wires["a"];
-}
-
-function findPart2() {
-    wires = { b: part1 };
+const part1 = (input) => {
+    input = input.split("\n");
 
     while (!isWireDefined("a")) {
         input.forEach((x) => doOperation(x));
     }
 
-    part2 = wires["a"];
-}
+    let output = wires["a"];
 
-findPart1();
-findPart2();
+    return output;
+};
 
-console.log(part1, part2);
+// Part 2
+// ======
+
+const part2 = (input) => {
+    wires = { b: part1(input) };
+
+    input = input.split("\n");
+
+    while (!isWireDefined("a")) {
+        input.forEach((x) => doOperation(x));
+    }
+
+    let output = wires["a"];
+
+    return output;
+};
+
+module.exports = { part1, part2 };
