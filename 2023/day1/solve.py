@@ -3,10 +3,11 @@ input = None
 with open('input.txt') as f:
     input = f.read()
 
+lines = input.splitlines()
+
 
 # region part_one
 def part_one():
-    lines = input.splitlines()
 
     ans = 0
 
